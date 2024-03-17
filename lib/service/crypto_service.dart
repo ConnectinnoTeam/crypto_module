@@ -1,4 +1,5 @@
 import 'package:crypto_connect/algo/abstract/crypt_algo.dart';
+import 'package:encrypt/encrypt.dart';
 
 class CryptoService<T extends CryptAlgo> {
   CryptoService._();
@@ -16,5 +17,12 @@ class CryptoService<T extends CryptAlgo> {
       throw Exception("Algo not initialized");
     }
     return _algo!.decrypt(encryptedContent);
+  }
+
+  Future<Encrypted> encrypt(String plainText) async {
+    if (_algo == null) {
+      throw Exception("Algo not initialized");
+    }
+    return _algo!.encrypt(plainText);
   }
 }
