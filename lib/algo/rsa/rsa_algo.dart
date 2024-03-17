@@ -35,8 +35,45 @@ class RsaAlgo extends CryptAlgo {
     final encryptor =
         Encrypter(RSA(publicKey: publicKey, privateKey: privateKey));
     final decrypted = encryptor.decrypt64(encryptedContent);
+
+    await _deleteFile(privateKeyPath);
+    await _deleteFile(publicKeyPath);
+
     return decrypted;
   }
+
+  @override
+  Future<Encrypted> encrypt(String plaintext) async {
+    final privateKeyPath = await _createFile(
+      privateKeyContent,
+      isBase64Encoded,
+    );
+    final publicKeyPath = await _createFile(
+      publicKeyContent,
+      false,
+    );
+    final publicKey = await parseKeyFromFile<RSAPublicKey>(publicKeyPath);
+    final privateKey = await parseKeyFromFile<RSAPrivateKey>(privateKeyPath);
+    final encryptor = Encrypter(RSA(publicKey: publicKey, privateKey: privateKey));
+    final encryptedContent = encryptor.encrypt(plaintext);
+
+    await _deleteFile(privateKeyPath);
+    await _deleteFile(publicKeyPath);
+
+    return encryptedContent;
+  }
+
+  Future<void> _deleteFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      return;
+    }
+  }
+  
 
   Future<String> _createFile(String content, bool isBase64Encoded) async {
     final now = DateTime.now();
